@@ -35,15 +35,22 @@ eye = pd.read_csv("./exploration/national_cataract_data_regions-2.csv")
 location = pd.read_csv("./exploration/ons_postcodes_latlong.csv")
 regions = pd.read_csv("./exploration/NHS_England_Regions_July_2022_EN_BFC_2022_8847953782386516656.csv")
 
-# st.multiselect(label=)
+show_colours = st.multiselect(label='Show which colour pins?', options=('red','orange','green'),default='red')
+show_colours_str = ",".join(f"'{i}'" for i in show_colours)
+
 eye = duckdb.sql('SELECT * FROM eye WHERE lat IS NOT NULL AND long IS NOT NULL').df()
-geolist = duckdb.sql("""
+geolist = duckdb.sql(f"""
 SELECT *, 
 CASE WHEN WMean_2022 > 80
 THEN 'red'
 WHEN WMean_2022 >=60 THEN 'orange'
 ELSE 'green' END AS color
-FROM geolist""").df()
+FROM geolist
+WHERE 
+CASE WHEN WMean_2022 > 80
+THEN 'red'
+WHEN WMean_2022 >=60 THEN 'orange'
+ELSE 'green' END  IN ({show_colours_str})   """).df()
 
 # Your DataFrame 'eye' with 'latitude', 'longitude', 'tooltip_text', and 'popup_text' columns
 
