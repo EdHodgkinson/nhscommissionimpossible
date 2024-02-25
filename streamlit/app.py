@@ -12,6 +12,8 @@ st.code(f'df.drop(columns=({drop_cols_str}))')
 
 
 edited_df = st.data_editor(df, num_rows="dynamic")
+map_df = duckdb.sql('SELECT * FROM edited_df WHERE lat IS NOT NULL').df()
+st.map(data=map_df,latitude ='lat',longitude='long')
 
 
 group_col = st.selectbox(label='Select a grouping column',options=df.columns)
