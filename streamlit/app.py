@@ -22,7 +22,7 @@ measure_cols = st.multiselect(label='Select a measure column',options=df.columns
 
 measure_cols_agg = []
 for measure in measure_cols:
-    measure_str = st.selectbox(label=f'Select aggregate for {measure}',options=('Sum','Avg'), key=measure) + f'({measure})'
+    measure_str = st.selectbox(label=f'Select aggregate for {measure}',options=('Sum','Avg','Min','Max'), key=measure) + f'({measure})'
     st.write(measure_str)
     measure_cols_agg.append(measure_str)
 
