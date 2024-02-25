@@ -54,7 +54,7 @@ ELSE 'green' END  IN ({show_colours_str})   """).df()
 
 # Your DataFrame 'eye' with 'latitude', 'longitude', 'tooltip_text', and 'popup_text' columns
 
-m = folium.Map(location=[50.8194, -0.118177], zoom_start=12)
+m = folium.Map(location=[50.8194, -0.118177], zoom_start=6)
 
 # Iterate over DataFrame rows
 for index, row in eye.iterrows():
