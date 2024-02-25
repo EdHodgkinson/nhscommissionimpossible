@@ -24,11 +24,9 @@ st.header('ComMission ImPossible')
 st.write(f"""This app is being developed as part of NHS Hack Day 2024 @ Moorfields.""")
 st.write(f"""The intention of this is to overlay different sets of data relating to cataracts services to point to areas of greatest need of additional services""")
 
-st.write("""
-Blue is the NHS regions - funding is distributed by regions
-Purple- hospital and their number of surgeries per year
-Colours: red, green and orange is the average waiting times (provisional 2022) if red the average times is above 80 days
-""")
+st.write("Blue is the NHS regions - funding is distributed by regions")
+st.write("Purple- hospital and their number of surgeries per year")
+st.write("Colours: red, green and orange is the average waiting times (provisional 2022) if red the average times is above 80 days")
 
 geolist = pd.read_csv("./exploration/geospatialData.csv")
 eye = pd.read_csv("./exploration/national_cataract_data_regions-2.csv")
