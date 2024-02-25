@@ -1,7 +1,7 @@
 import streamlit as st
 import duckdb
-import pandas as pd
-import numpy as np
+# import pandas as pd
+# import numpy as np
 
 df = duckdb.read_csv('./data/cleansed/national_cataract_data_regions.csv').df()
 
