@@ -19,6 +19,57 @@ Looking at tools to help layer and aggregate data over different regions for NHS
     }
 )
 
+geolist = pd.read_csv("./exploration/geospatialData.csv")
+eye = pd.read_csv("./exploration/national_cataract_data_regions-2.csv")
+location = pd.read_csv("./exploration/ons_postcodes_latlong.csv")
+regions = pd.read_csv("./exploration/NHS_England_Regions_July_2022_EN_BFC_2022_8847953782386516656.csv")
+
+eye = duckdb.sql('SELECT * FROM eye WHERE lat IS NOT NULL AND long IS NOT NULL').df()
+
+# Your DataFrame 'eye' with 'latitude', 'longitude', 'tooltip_text', and 'popup_text' columns
+
+m = folium.Map(location=[50.8194, -0.118177], zoom_start=12)
+
+# Iterate over DataFrame rows
+for index, row in eye.iterrows():
+    # Create a Marker for each point in the DataFrame
+    folium.Marker(
+        location=[row['lat'], row['long']],
+        tooltip=row['TrustName'],  # Use the text from the 'tooltip_text' column
+        popup=row['NumberHESOperations'],  # Use the text from the 'popup_text' column
+        icon=folium.Icon(color="purple"),  # You can change the color or icon as needed
+    ).add_to(m)
+
+# Add markers to the map
+for index, row in regions.iterrows():
+    folium.Marker(
+        location=[row['LAT'], row['LONG']],
+        popup=row['NHSER22NM'],  # Show the region name in the popup
+        tooltip=row['NHSER22CD']  # Show the region code in the tooltip
+    ).add_to(m)  
+    
+for index, row in geolist.iterrows():
+    # Determine the color based on the value of WMean_2022
+    if row['WMean_2022'] > 80:
+        color = "red"
+    elif 60 <= row['WMean_2022'] <= 80:
+        color = "orange"
+    else:
+        color = "green"
+
+    # Create a Marker with the determined color
+    folium.Marker(
+        location=[row['LAT'], row['LONG']],
+        popup=row['ICB23NM'],  # Show the region name in the popup
+        tooltip=row['WMean_2022'],  # Show the value in the tooltip
+        icon=folium.Icon(color=color)  # Use the determined color
+    ).add_to(m)
+
+
+st_map = folium_static(m, width=700, height=450)
+
+
+
 # importing our CSV of data - most of this script should be fairly generic based on this input
 df = duckdb.read_csv('./data/cleansed/national_cataract_data_regions.csv').df()
 
@@ -56,58 +107,3 @@ st.write(measure_cols_str)
 
 agg_df = duckdb.sql(f'SELECT {group_col}, {measure_cols_str} FROM edited_df GROUP BY {group_col} ').df()
 st.dataframe(agg_df)
-
-
-geolist = pd.read_csv("./exploration/geospatialData.csv")
-eye = pd.read_csv("./exploration/national_cataract_data_regions-2.csv")
-location = pd.read_csv("./exploration/ons_postcodes_latlong.csv")
-regions = pd.read_csv("./exploration/NHS_England_Regions_July_2022_EN_BFC_2022_8847953782386516656.csv")
-
-eye = duckdb.sql('SELECT * FROM eye WHERE lat IS NOT NULL AND long IS NOT NULL').df()
-
-st.write('Loaded map data')
-# Your DataFrame 'eye' with 'latitude', 'longitude', 'tooltip_text', and 'popup_text' columns
-
-m = folium.Map(location=[50.8194, -0.118177], zoom_start=12)
-st.write('initialised map')
-
-# Iterate over DataFrame rows
-for index, row in eye.iterrows():
-    # Create a Marker for each point in the DataFrame
-    folium.Marker(
-        location=[row['lat'], row['long']],
-        tooltip=row['TrustName'],  # Use the text from the 'tooltip_text' column
-        popup=row['NumberHESOperations'],  # Use the text from the 'popup_text' column
-        icon=folium.Icon(color="purple"),  # You can change the color or icon as needed
-    ).add_to(m)
-st.write('added eye data')
-
-# Add markers to the map
-for index, row in regions.iterrows():
-    folium.Marker(
-        location=[row['LAT'], row['LONG']],
-        popup=row['NHSER22NM'],  # Show the region name in the popup
-        tooltip=row['NHSER22CD']  # Show the region code in the tooltip
-    ).add_to(m)  
-st.write('added regions data')
-    
-for index, row in geolist.iterrows():
-    # Determine the color based on the value of WMean_2022
-    if row['WMean_2022'] > 80:
-        color = "red"
-    elif 60 <= row['WMean_2022'] <= 80:
-        color = "orange"
-    else:
-        color = "green"
-
-    # Create a Marker with the determined color
-    folium.Marker(
-        location=[row['LAT'], row['LONG']],
-        popup=row['ICB23NM'],  # Show the region name in the popup
-        tooltip=row['WMean_2022'],  # Show the value in the tooltip
-        icon=folium.Icon(color=color)  # Use the determined color
-    ).add_to(m)
-st.write('added geolist data')
-
-
-st_map = folium_static(m, width=700, height=450)
