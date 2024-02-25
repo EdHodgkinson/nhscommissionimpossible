@@ -19,12 +19,31 @@ Looking at tools to help layer and aggregate data over different regions for NHS
     }
 )
 
+st.header('ComMission ImPossible')
+
+st.write(f"""This app is being developed as part of NHS Hack Day 2024 @ Moorfields.""")
+st.write(f"""The intention of this is to overlay different sets of data relating to cataracts services to point to areas of greatest need of additional services""")
+
+st.write("""
+Blue is the NHS regions - funding is distributed by regions
+Purple- hospital and their number of surgeries per year
+Colours: red, green and orange is the average waiting times (provisional 2022) if red the average times is above 80 days
+""")
+
 geolist = pd.read_csv("./exploration/geospatialData.csv")
 eye = pd.read_csv("./exploration/national_cataract_data_regions-2.csv")
 location = pd.read_csv("./exploration/ons_postcodes_latlong.csv")
 regions = pd.read_csv("./exploration/NHS_England_Regions_July_2022_EN_BFC_2022_8847953782386516656.csv")
 
+# st.multiselect(label=)
 eye = duckdb.sql('SELECT * FROM eye WHERE lat IS NOT NULL AND long IS NOT NULL').df()
+geolist = duckdb.sql("""
+SELECT *, 
+CASE WHEN WMean_2022 > 80
+THEN 'red'
+WHEN WMean_2022 >=60 THEN 'orange'
+ELSE 'green' END AS color
+FROM geolist""").df()
 
 # Your DataFrame 'eye' with 'latitude', 'longitude', 'tooltip_text', and 'popup_text' columns
 
@@ -49,20 +68,13 @@ for index, row in regions.iterrows():
     ).add_to(m)  
     
 for index, row in geolist.iterrows():
-    # Determine the color based on the value of WMean_2022
-    if row['WMean_2022'] > 80:
-        color = "red"
-    elif 60 <= row['WMean_2022'] <= 80:
-        color = "orange"
-    else:
-        color = "green"
-
+ 
     # Create a Marker with the determined color
     folium.Marker(
         location=[row['LAT'], row['LONG']],
         popup=row['ICB23NM'],  # Show the region name in the popup
         tooltip=row['WMean_2022'],  # Show the value in the tooltip
-        icon=folium.Icon(color=color)  # Use the determined color
+        icon=folium.Icon(color=row['color'])  # Use the determined color
     ).add_to(m)
 
 
