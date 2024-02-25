@@ -1,2 +1,5 @@
 streamlit
 duckdb
+streamlit_folium
+folium
+pandas
