@@ -3,15 +3,20 @@ import duckdb
 import pandas as pd
 import numpy as np
 
-df = pd.DataFrame({
-    "col1": np.random.randn(1000) / 50 + 37.76,
-    "col2": np.random.randn(1000) / 50 + -122.4,
-    "col3": np.random.randn(1000) * 100,
-    "col4": np.random.rand(1000, 4).tolist(),
-})
+df = duckdb.read_csv('./data/cleansed/national_cataract_data_regions.csv').df()
 
-st.map(df,
-    latitude='col1',
-    longitude='col2',
-    size='col3',
-    color='col4')
+drop_cols = st.multiselect(label='Select columns to drop from df', options=df.columns)
+drop_cols_str = ",".join(f'"{i}"' for i in drop_cols)
+df.drop(columns=drop_cols,inplace=True)
+st.code(f'df.drop(columns=({drop_cols_str}))')
+
+
+edited_df = st.data_editor(df, num_rows="dynamic")
+
+
+group_col = st.selectbox(label='Select a grouping column',options=df.columns)
+measure_col = st.selectbox(label='Select a measure column',options=df.columns)
+aggregate = st.selectbox(label='Select aggregate for measure',options=('Sum','Avg'))
+
+agg_df = duckdb.sql(f'SELECT {group_col}, {aggregate}({measure_col}) FROM edited_df GROUP BY {group_col} ').df()
+st.dataframe(agg_df)
